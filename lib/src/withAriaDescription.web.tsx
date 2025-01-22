@@ -1,10 +1,17 @@
-import {useEffect, useId, useRef} from 'react'
+import {
+  forwardRef,
+  useEffect,
+  useId,
+  useRef,
+  type MutableRefObject,
+} from 'react'
+import {StyleSheet} from 'react-native'
 import type {
   AccessibilityHintProps,
   AriaDescriptionProps,
-  WithAriaDescription,
+  WithAriaDescriptionOptions,
 } from './types'
-import {StyleSheet} from 'react-native'
+import assignStatic from './assignStatic'
 
 const styles = StyleSheet.create({
   hidden: {
@@ -12,88 +19,162 @@ const styles = StyleSheet.create({
   },
 })
 
-const withDescribedBy =
-  <P extends object>(
-    Component: Parameters<WithAriaDescription<P>>[0],
-  ): ReturnType<WithAriaDescription<P>> =>
-  ({
-    accessibilityHint,
-    ...props
-  }: AriaDescriptionProps & AccessibilityHintProps & P) => {
-    const id = useId()
-    const ref = useRef(null)
+const withDescribedBy = <C extends {}, P = {}>(Component: C) =>
+  forwardRef<C, AriaDescriptionProps & AccessibilityHintProps & P>(
+    (
+      {accessibilityHint, 'aria-description': ariaDescription, ...props},
+      ref,
+    ) => {
+      const id = useId()
+      const description = ariaDescription ?? accessibilityHint
 
-    useEffect(() => {
-      if (ref.current) {
-        // Manually add the aria-describedby attribute
-        ;(ref.current as HTMLElement)?.setAttribute('aria-describedby', id)
+      // As per the aria guidelines if the content is already on the screen then reference that instead
+      if (!(props as any)['aria-describedby'] && description) {
+        return [
+          // @ts-expect-error P as object is too broad a type and throws ts-2322.
+          <Component
+            key="component"
+            ref={ref}
+            {...props}
+            aria-describedby={id}
+          />,
+          <p
+            key="described-by"
+            style={styles.hidden}
+            id={id}>
+            {description}
+          </p>,
+        ]
       }
-    }, [id])
-
-    // As per the aria guidelines if the content is already on the screen then reference that instead
-    if (!(props as any)['aria-describedby']) {
-      return [
+      return (
         // @ts-expect-error P as object is too broad a type and throws ts-2322.
         <Component
           ref={ref}
-          key="component"
           {...props}
-          aria-describedby={id}
-        />,
-        <p
-          key="described-by"
-          style={styles.hidden}
-          id={id}>
-          {accessibilityHint ?? props['aria-description']}
-        </p>,
-      ]
-    }
-    // @ts-expect-error P as object is too broad a type and throws ts-2322.
-    return <Component {...props} />
-  }
+        />
+      )
+    },
+  )
 
-const withDescription =
-  <P extends object>(
-    Component: Parameters<WithAriaDescription<P>>[0],
-  ): ReturnType<WithAriaDescription<P>> =>
-  ({
-    accessibilityHint,
-    ...props
-  }: AriaDescriptionProps & AccessibilityHintProps & P) => {
-    const ref = useRef(null)
-    const description = props['aria-description'] ?? accessibilityHint
+const withDescribedByUseEffect = <C extends {}, P = {}>(Component: C) =>
+  forwardRef<C, AriaDescriptionProps & AccessibilityHintProps & P>(
+    (
+      {accessibilityHint, 'aria-description': ariaDescription, ...props},
+      ref,
+    ) => {
+      const internalRef = useRef(null)
+      const id = useId()
+      const description = ariaDescription ?? accessibilityHint
 
-    useEffect(() => {
-      if (ref.current && description) {
-        // Manually add the aria-description attribute
-        ;(ref.current as HTMLElement)?.setAttribute(
-          'aria-description',
-          description,
-        )
+      useEffect(() => {
+        const refToUse = (ref as MutableRefObject<unknown>) ?? internalRef
+        if (refToUse?.current && description) {
+          // Manually add the aria-describedby attribute
+          ;(refToUse?.current as HTMLElement)?.setAttribute(
+            'aria-describedby',
+            id,
+          )
+        }
+      }, [ref, description, id])
+
+      // As per the aria guidelines if the content is already on the screen then reference that instead
+      if (!(props as any)['aria-describedby'] && description) {
+        return [
+          // @ts-expect-error P as object is too broad a type and throws ts-2322.
+          <Component
+            key="component"
+            ref={ref ?? internalRef}
+            {...props}
+          />,
+          <p
+            key="described-by"
+            style={styles.hidden}
+            id={id}>
+            {description}
+          </p>,
+        ]
       }
-    }, [])
+      return (
+        // @ts-expect-error P as object is too broad a type and throws ts-2322.
+        <Component
+          ref={ref}
+          {...props}
+        />
+      )
+    },
+  )
 
-    return (
-      // @ts-expect-error P as object is too broad a type and throws ts-2322.
-      <Component
-        {...props}
-        aria-description={description}
-      />
-    )
-  }
+const withDescription = <C extends {}, P = {}>(Component: C) =>
+  forwardRef<C, AriaDescriptionProps & AccessibilityHintProps & P>(
+    (
+      {accessibilityHint, 'aria-description': ariaDescription, ...props},
+      ref,
+    ) => {
+      const description = ariaDescription ?? accessibilityHint
 
-const withAriaDescription = <P extends object>(
-  Component: Parameters<WithAriaDescription<P>>[0],
-  replaceWithDescribedBy: Parameters<WithAriaDescription<P>>[1] = true,
-): ReturnType<WithAriaDescription<P>> => {
-  let result: ReturnType<WithAriaDescription<P>>
-  if (replaceWithDescribedBy) {
-    result = withDescribedBy<P>(Component)
+      return (
+        // @ts-expect-error P as object is too broad a type and throws ts-2322.
+        <Component
+          ref={ref}
+          {...props}
+          aria-description={description}
+        />
+      )
+    },
+  )
+
+const withDescriptionUseEffect = <C extends {}, P = {}>(Component: C) =>
+  forwardRef<C, AriaDescriptionProps & AccessibilityHintProps & P>(
+    (
+      {accessibilityHint, 'aria-description': ariaDescription, ...props},
+      ref,
+    ) => {
+      const internalRef = useRef(null)
+      useEffect(() => {
+        const refToUse = (ref as MutableRefObject<unknown>) ?? internalRef
+        const description = ariaDescription ?? accessibilityHint
+        if (refToUse?.current && description) {
+          // Manually add the aria-description attribute
+          ;(refToUse?.current as HTMLElement)?.setAttribute(
+            'aria-description',
+            description,
+          )
+        }
+      }, [ref, ariaDescription, accessibilityHint])
+
+      return (
+        // @ts-expect-error P as object is too broad a type and throws ts-2322.
+        <Component
+          ref={ref ?? internalRef}
+          {...props}
+        />
+      )
+    },
+  )
+
+const withAriaDescription = <C extends {}, P = {}>(
+  Component: C,
+  {web}: WithAriaDescriptionOptions = {},
+) => {
+  let result: ReturnType<
+    typeof forwardRef<C, AriaDescriptionProps & AccessibilityHintProps & P>
+  >
+  const replaceWithDescribedBy =
+    web?.replaceWithDescribedBy === undefined || web.replaceWithDescribedBy
+  if (web?.useEffect) {
+    if (replaceWithDescribedBy) {
+      result = withDescribedByUseEffect<C, P>(Component)
+    } else {
+      result = withDescriptionUseEffect<C, P>(Component)
+    }
+  } else if (replaceWithDescribedBy) {
+    result = withDescribedBy<C, P>(Component)
   } else {
-    result = withDescription<P>(Component)
+    result = withDescription<C, P>(Component)
   }
 
-  return Object.assign(result, Component)
+  const combined = assignStatic(result, Component)
+  return combined
 }
 
 export default withAriaDescription

@@ -1,4 +1,4 @@
-import type {AriaAttributes, ComponentType} from 'react'
+import type {AriaAttributes} from 'react'
 import type {ViewProps} from 'react-native'
 
 export type AccessibilityHintProps = {
@@ -11,7 +11,11 @@ export type AccessibilityHintProps = {
 
 export type AriaDescriptionProps = Pick<AriaAttributes, 'aria-description'>
 
-export type WithAriaDescription<P = {}> = (
-  Component: ComponentType<P>,
-  replaceWithDescribedBy?: boolean,
-) => ComponentType<AriaDescriptionProps & P>
+export type WithAriaDescriptionOptionsWeb = {
+  useEffect?: boolean
+  replaceWithDescribedBy?: boolean
+}
+
+export type WithAriaDescriptionOptions = {
+  web?: WithAriaDescriptionOptionsWeb
+}

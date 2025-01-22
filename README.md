@@ -29,7 +29,7 @@ Wrap your component with `withAriaDescription`:
 import {View, Text, Button} from 'react-native'
 +import {withAriaDescription} from 'react-native-aria-description'
 +
-+const CustomButton = withAriaDescription(Button)
++const CustomButton = withAriaDescription(Button, {web: {useEffect: true}})
 
 export default function App() {
   return (
@@ -47,7 +47,9 @@ export default function App() {
 }
 ```
 
-If you want the web element to use `aria-description` instead of the `aria-describedby` polyfill then call with `false`: `withAriaDescription(Button, false)`.
+`{web: {useEffect: true}}` is required on components that don't propagate the props into the web element.
+
+If you want the web element to use `aria-description` instead of the `aria-describedby` polyfill then call with `false`: `withAriaDescription(Button, {web: {replaceWithDescribedBy: false}})`.
 
 <!-- Definitions -->
 

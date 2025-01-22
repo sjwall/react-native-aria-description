@@ -1,24 +1,36 @@
+import {forwardRef} from 'react'
 import type {
   AccessibilityHintProps,
   AriaDescriptionProps,
-  WithAriaDescription,
+  WithAriaDescriptionOptions,
 } from './types'
+import assignStatic from './assignStatic'
 
-const withAriaDescription = <P extends object>(
-  Component: Parameters<WithAriaDescription<P>>[0],
-): ReturnType<WithAriaDescription<P>> => {
-  const result: ReturnType<WithAriaDescription<P>> = ({
-    accessibilityHint,
-    ...props
-  }: AriaDescriptionProps & AccessibilityHintProps & P) => (
-    // @ts-expect-error P as object is too broad a type and throws ts-2322.
-    <Component
-      accessibilityHint={props['aria-description'] ?? accessibilityHint}
-      {...props}
-    />
+const withAriaDescription = <C extends {}, P = {}>(
+  Component: C,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // @ts-expect-error
+  options: WithAriaDescriptionOptions = {},
+) => {
+  const result = forwardRef<
+    unknown,
+    AriaDescriptionProps & AccessibilityHintProps & P
+  >(
+    (
+      {accessibilityHint, 'aria-description': ariaDescription, ...props},
+      ref,
+    ) => (
+      // @ts-expect-error P as object is too broad a type and throws ts-2322.
+      <Component
+        ref={ref}
+        accessibilityHint={ariaDescription ?? accessibilityHint}
+        {...props}
+      />
+    ),
   )
 
-  return Object.assign(result, Component)
+  const combined = assignStatic(result, Component)
+  return combined
 }
 
 export default withAriaDescription

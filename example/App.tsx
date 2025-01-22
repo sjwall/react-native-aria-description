@@ -2,7 +2,7 @@ import {StatusBar} from 'expo-status-bar'
 import {StyleSheet, Text, View, Button} from 'react-native'
 import {withAriaDescription} from 'react-native-aria-description'
 
-const CustomButton = withAriaDescription(Button)
+const CustomButton = withAriaDescription(Button, {web: {useEffect: true}})
 
 export default function App() {
   return (
