@@ -38,8 +38,8 @@
     "type": "library",
     "version": "0.44.1"
   },
-  "source": "./src/index.tsx",
-  "react-native": "./src/index.tsx",
+  "source": "./src/index.ts",
+  "react-native": "./src/index.ts",
   "module": "./dist/module/index.js",
   "types": "./dist/typescript/commonjs/src/index.d.ts",
   "exports": {
