@@ -19,3 +19,7 @@ export type WithAriaDescriptionOptionsWeb = {
 export type WithAriaDescriptionOptions = {
   web?: WithAriaDescriptionOptionsWeb
 }
+
+export type OptionalAccessibilityHint<A> = A extends AccessibilityHintProps
+  ? A & AccessibilityHintProps
+  : A

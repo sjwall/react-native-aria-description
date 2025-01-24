@@ -7,11 +7,14 @@ import {
   type ComponentType,
   type ForwardRefExoticComponent,
   type MutableRefObject,
+  type PropsWithoutRef,
+  type RefAttributes,
 } from 'react'
 import {StyleSheet} from 'react-native'
 import type {
   AccessibilityHintProps,
   AriaDescriptionProps,
+  OptionalAccessibilityHint,
   WithAriaDescriptionOptions,
 } from './types'
 import mergeDefaultShallow from './mergeDefaultShallow'
@@ -163,8 +166,8 @@ const withDescriptionUseEffect = <T, P = {}>(
     },
   )
 
-const withAriaDescription = <T, P = {}>(
-  Component: Component<P> | ComponentType<P> | ForwardRefExoticComponent<P>,
+const withAriaDescription = <T, C, P>(
+  Component: C,
   {web}: WithAriaDescriptionOptions = {},
 ) => {
   let result: ReturnType<typeof forwardRef<T, AriaDescriptionProps & P>>
@@ -172,18 +175,22 @@ const withAriaDescription = <T, P = {}>(
     web?.replaceWithDescribedBy === undefined || web.replaceWithDescribedBy
   if (web?.useEffect) {
     if (replaceWithDescribedBy) {
-      result = withDescribedByUseEffect<T, P>(Component)
+      result = withDescribedByUseEffect<T, P>(Component as ComponentType<P>)
     } else {
-      result = withDescriptionUseEffect<T, P>(Component)
+      result = withDescriptionUseEffect<T, P>(Component as ComponentType<P>)
     }
   } else if (replaceWithDescribedBy) {
-    result = withDescribedBy<T, P>(Component)
+    result = withDescribedBy<T, P>(Component as ComponentType<P>)
   } else {
-    result = withDescription<T, P>(Component)
+    result = withDescription<T, P>(Component as ComponentType<P>)
   }
 
   const combined = mergeDefaultShallow(result, Component)
-  return combined
+  return combined as C &
+    ForwardRefExoticComponent<
+      PropsWithoutRef<OptionalAccessibilityHint<P> & AriaDescriptionProps> &
+        RefAttributes<T>
+    >
 }
 
 export default withAriaDescription

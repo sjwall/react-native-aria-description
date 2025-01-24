@@ -1,18 +1,19 @@
 import {
   forwardRef,
-  type Component,
-  type ComponentType,
   type ForwardRefExoticComponent,
+  type PropsWithoutRef,
+  type RefAttributes,
 } from 'react'
 import type {
   AccessibilityHintProps,
   AriaDescriptionProps,
+  OptionalAccessibilityHint,
   WithAriaDescriptionOptions,
 } from './types'
 import mergeDefaultShallow from './mergeDefaultShallow'
 
-const withAriaDescription = <T, P = {}>(
-  Component: Component<P> | ComponentType<P> | ForwardRefExoticComponent<P>,
+const withAriaDescription = <T, C, P>(
+  Component: C,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   // @ts-expect-error
   options: WithAriaDescriptionOptions = {},
@@ -35,7 +36,11 @@ const withAriaDescription = <T, P = {}>(
   )
 
   const combined = mergeDefaultShallow(result, Component)
-  return combined
+  return combined as C &
+    ForwardRefExoticComponent<
+      PropsWithoutRef<OptionalAccessibilityHint<P> & AriaDescriptionProps> &
+        RefAttributes<T>
+    >
 }
 
 export default withAriaDescription
