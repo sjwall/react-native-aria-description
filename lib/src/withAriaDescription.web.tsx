@@ -3,6 +3,9 @@ import {
   useEffect,
   useId,
   useRef,
+  type Component,
+  type ComponentType,
+  type ForwardRefExoticComponent,
   type MutableRefObject,
 } from 'react'
 import {StyleSheet} from 'react-native'
@@ -19,8 +22,10 @@ const styles = StyleSheet.create({
   },
 })
 
-const withDescribedBy = <C extends {}, P = {}>(Component: C) =>
-  forwardRef<C, AriaDescriptionProps & AccessibilityHintProps & P>(
+const withDescribedBy = <T, P = {}>(
+  Component: Component<P> | ComponentType<P> | ForwardRefExoticComponent<P>,
+) =>
+  forwardRef<T, AriaDescriptionProps & AccessibilityHintProps & P>(
     (
       {accessibilityHint, 'aria-description': ariaDescription, ...props},
       ref,
@@ -56,8 +61,10 @@ const withDescribedBy = <C extends {}, P = {}>(Component: C) =>
     },
   )
 
-const withDescribedByUseEffect = <C extends {}, P = {}>(Component: C) =>
-  forwardRef<C, AriaDescriptionProps & AccessibilityHintProps & P>(
+const withDescribedByUseEffect = <T, P = {}>(
+  Component: Component<P> | ComponentType<P> | ForwardRefExoticComponent<P>,
+) =>
+  forwardRef<T, AriaDescriptionProps & AccessibilityHintProps & P>(
     (
       {accessibilityHint, 'aria-description': ariaDescription, ...props},
       ref,
@@ -104,8 +111,10 @@ const withDescribedByUseEffect = <C extends {}, P = {}>(Component: C) =>
     },
   )
 
-const withDescription = <C extends {}, P = {}>(Component: C) =>
-  forwardRef<C, AriaDescriptionProps & AccessibilityHintProps & P>(
+const withDescription = <T, P = {}>(
+  Component: Component<P> | ComponentType<P> | ForwardRefExoticComponent<P>,
+) =>
+  forwardRef<T, AriaDescriptionProps & AccessibilityHintProps & P>(
     (
       {accessibilityHint, 'aria-description': ariaDescription, ...props},
       ref,
@@ -123,8 +132,10 @@ const withDescription = <C extends {}, P = {}>(Component: C) =>
     },
   )
 
-const withDescriptionUseEffect = <C extends {}, P = {}>(Component: C) =>
-  forwardRef<C, AriaDescriptionProps & AccessibilityHintProps & P>(
+const withDescriptionUseEffect = <T, P = {}>(
+  Component: Component<P> | ComponentType<P> | ForwardRefExoticComponent<P>,
+) =>
+  forwardRef<T, AriaDescriptionProps & AccessibilityHintProps & P>(
     (
       {accessibilityHint, 'aria-description': ariaDescription, ...props},
       ref,
@@ -152,25 +163,23 @@ const withDescriptionUseEffect = <C extends {}, P = {}>(Component: C) =>
     },
   )
 
-const withAriaDescription = <C extends {}, P = {}>(
-  Component: C,
+const withAriaDescription = <T, P = {}>(
+  Component: Component<P> | ComponentType<P> | ForwardRefExoticComponent<P>,
   {web}: WithAriaDescriptionOptions = {},
 ) => {
-  let result: ReturnType<
-    typeof forwardRef<C, AriaDescriptionProps & AccessibilityHintProps & P>
-  >
+  let result: ReturnType<typeof forwardRef<T, AriaDescriptionProps & P>>
   const replaceWithDescribedBy =
     web?.replaceWithDescribedBy === undefined || web.replaceWithDescribedBy
   if (web?.useEffect) {
     if (replaceWithDescribedBy) {
-      result = withDescribedByUseEffect<C, P>(Component)
+      result = withDescribedByUseEffect<T, P>(Component)
     } else {
-      result = withDescriptionUseEffect<C, P>(Component)
+      result = withDescriptionUseEffect<T, P>(Component)
     }
   } else if (replaceWithDescribedBy) {
-    result = withDescribedBy<C, P>(Component)
+    result = withDescribedBy<T, P>(Component)
   } else {
-    result = withDescription<C, P>(Component)
+    result = withDescription<T, P>(Component)
   }
 
   const combined = assignStatic(result, Component)

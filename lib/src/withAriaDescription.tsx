@@ -1,4 +1,9 @@
-import {forwardRef} from 'react'
+import {
+  forwardRef,
+  type Component,
+  type ComponentType,
+  type ForwardRefExoticComponent,
+} from 'react'
 import type {
   AccessibilityHintProps,
   AriaDescriptionProps,
@@ -6,14 +11,14 @@ import type {
 } from './types'
 import assignStatic from './assignStatic'
 
-const withAriaDescription = <C extends {}, P = {}>(
-  Component: C,
+const withAriaDescription = <T, P = {}>(
+  Component: Component<P> | ComponentType<P> | ForwardRefExoticComponent<P>,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   // @ts-expect-error
   options: WithAriaDescriptionOptions = {},
 ) => {
   const result = forwardRef<
-    unknown,
+    T,
     AriaDescriptionProps & AccessibilityHintProps & P
   >(
     (
