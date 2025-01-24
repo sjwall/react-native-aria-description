@@ -1,4 +1,4 @@
-export default function assignStatic<T extends {}, U extends {}>(
+export default function mergeDefaultShallow<T extends {}, U extends {}>(
   target: T,
   source: U,
 ): T & U {

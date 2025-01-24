@@ -14,7 +14,7 @@ import type {
   AriaDescriptionProps,
   WithAriaDescriptionOptions,
 } from './types'
-import assignStatic from './assignStatic'
+import mergeDefaultShallow from './mergeDefaultShallow'
 
 const styles = StyleSheet.create({
   hidden: {
@@ -182,7 +182,7 @@ const withAriaDescription = <T, P = {}>(
     result = withDescription<T, P>(Component)
   }
 
-  const combined = assignStatic(result, Component)
+  const combined = mergeDefaultShallow(result, Component)
   return combined
 }
 

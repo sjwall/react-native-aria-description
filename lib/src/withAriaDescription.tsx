@@ -9,7 +9,7 @@ import type {
   AriaDescriptionProps,
   WithAriaDescriptionOptions,
 } from './types'
-import assignStatic from './assignStatic'
+import mergeDefaultShallow from './mergeDefaultShallow'
 
 const withAriaDescription = <T, P = {}>(
   Component: Component<P> | ComponentType<P> | ForwardRefExoticComponent<P>,
@@ -34,7 +34,7 @@ const withAriaDescription = <T, P = {}>(
     ),
   )
 
-  const combined = assignStatic(result, Component)
+  const combined = mergeDefaultShallow(result, Component)
   return combined
 }
 
